@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+
+  postgres_keycloak:
+    image: postgres
+    container_name: postgres_keycloak
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+      
+  keycloak:
+    image: jboss/keycloak
+    container_name: keycloak
+    hostname: keycloak
+    restart: always
+    depends_on:
+      - postgres_keycloak
+    command: ["-Djboss.http.port=9090"]
+    ports:
+      - '9090:9090'
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - PROXY_ADDRESS_FORWARDING=true
+      - KC_HOSTNAME_STRICT=false
+      - DB_VENDOR=postgres
+      - DB_ADDR=postgres_keycloak
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_SCHEMA=public
+      - DB_PASSWORD=password
+
+  redis-session:
+    image: 'bitnami/redis:latest'
+    restart: always
+    container_name: redis-session
+    hostname: redis-session
+    expose:
+      - '6379'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      
+  gateway-service:
+    image: 'gateway-service:latest'
+    depends_on:
+      - keycloak
+      - redis-session
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+    driver: local
+  session_cache:
+    driver: local
