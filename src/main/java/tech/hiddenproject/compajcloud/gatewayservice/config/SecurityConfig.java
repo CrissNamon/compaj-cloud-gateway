@@ -34,7 +34,7 @@ public class SecurityConfig {
         .csrf()
         .disable()
         .authorizeExchange()
-        .pathMatchers("/ui-service/*")
+        .pathMatchers("/processor-service/*")
         .authenticated()
         .pathMatchers("/hello")
         .authenticated()
