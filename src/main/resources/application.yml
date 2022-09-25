@@ -14,18 +14,24 @@ spring:
         binder:
           brokers: kafka1:19092
     gateway:
-      default-filters:
-        - TokenRelay=
       discovery:
         locator:
           enabled: true
       routes:
-        - id: ui-service
-          uri: lb://ui-service
+        - id: processor-service
+          uri: lb://processor-service
           predicates:
-            - Path=/ui-service/**
+            - Path=/processor-service/**
           filters:
             - StripPrefix=1
+            - TokenRelay=
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay=
         - id: keycloak
           uri: '${spring.security.oauth2.client.provider-uri}/'
           predicates:
@@ -33,6 +39,7 @@ spring:
           filters:
             - AddRequestHeader=X-Forwarded-For, ${spring.security.oauth2.client.provider-uri}
             - AddRequestHeader=X-Forwarded-Proto, http
+
   security:
     oauth2:
       client:
@@ -54,12 +61,6 @@ spring:
             authorization-grant-type: authorization_code
             scope:
               - openid
-              - offline_access
-  session:
-    store-type: redis
-  redis:
-    host: redis-session
-    port: 6379
 eureka:
   client:
     register-with-eureka: true
