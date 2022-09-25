@@ -22,23 +22,27 @@ import org.springframework.security.web.server.authentication.logout.WebSessionS
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-  @Autowired
-  private ReactiveClientRegistrationRepository clientRegistrationRepository;
+  private final ReactiveClientRegistrationRepository clientRegistrationRepository;
 
   @Value("${spring.security.oauth2.client.logout-uri}")
   private String logoutUrl;
 
+  @Autowired
+  public SecurityConfig(ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    this.clientRegistrationRepository = clientRegistrationRepository;
+  }
+
   @Bean
-  public SecurityWebFilterChain springSecurityFilterChain (ServerHttpSecurity http) {
+  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
     return http
         .csrf()
         .disable()
         .authorizeExchange()
-        .pathMatchers("/processor-service/*")
+        .pathMatchers("/processor-service/**")
         .authenticated()
-        .pathMatchers("/hello")
+        .pathMatchers("/user/**")
         .authenticated()
-        .pathMatchers("/**")
+        .anyExchange()
         .permitAll()
         .and()
         .oauth2Login()
@@ -51,11 +55,13 @@ public class SecurityConfig {
   }
 
   public ServerLogoutHandler logoutHandler() {
-    return new DelegatingServerLogoutHandler(new SecurityContextServerLogoutHandler(), new WebSessionServerLogoutHandler());
+    return new DelegatingServerLogoutHandler(
+        new SecurityContextServerLogoutHandler(), new WebSessionServerLogoutHandler());
   }
 
   public ServerLogoutSuccessHandler oidcLogoutSuccessHandler() {
-    OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
+    OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(
+        clientRegistrationRepository);
     logoutSuccessHandler.setLogoutSuccessUrl(URI.create(logoutUrl));
     return logoutSuccessHandler;
   }
