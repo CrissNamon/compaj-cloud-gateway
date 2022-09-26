@@ -1,6 +1,5 @@
 package tech.hiddenproject.compajcloud.gatewayservice.config;
 
-import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +61,7 @@ public class SecurityConfig {
   public ServerLogoutSuccessHandler oidcLogoutSuccessHandler() {
     OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(
         clientRegistrationRepository);
-    logoutSuccessHandler.setLogoutSuccessUrl(URI.create(logoutUrl));
+    logoutSuccessHandler.setPostLogoutRedirectUri(logoutUrl);
     return logoutSuccessHandler;
   }
 

@@ -45,7 +45,7 @@ spring:
       client:
         base-uri: http://192.168.1.144:8080
         provider-uri: http://192.168.1.144:9090
-        logout-uri: '${spring.security.oauth2.client.base-uri}/auth/realms/compaj/protocol/openid-connect/logout?redirect_uri=${spring.security.oauth2.client.base-uri}'
+        logout-uri: '${spring.security.oauth2.client.base-uri}'
         provider:
           keycloak:
             issuer-uri: '${spring.security.oauth2.client.provider-uri}/auth/realms/compaj'
